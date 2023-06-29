@@ -5,5 +5,5 @@
 5. In rental Nfts, the borrower of the nfts is called as the operator of the nfts. 
 6. In rental Nfts, the nfts are being lent for the specific rental period only and once the rental period expires the nfts will automatically be returned back to the creator of the nft.
 7. The use cases of rental nfts are as follows:- 
-1. To buy virtual land in the metaverse.
-2. buy on-chain nft assets in-game.
+  1. To buy virtual land in the metaverse.
+  2. buy on-chain nft assets in-game.
