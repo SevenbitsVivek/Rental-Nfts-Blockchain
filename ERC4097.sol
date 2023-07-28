@@ -1,27 +1,19 @@
 // SPDX-License-Identifier: CC0-1.0
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./IERC4907.sol";
 
 contract ERC4907 is ERC721, IERC4907 {
-
     struct UserInfo 
     {
         address user;   // address of user role
         uint64 expires; // unix timestamp, user expires
     }
 
-    mapping (uint256  => UserInfo) public _users;
+    mapping (uint256  => UserInfo) internal _users;
 
-    constructor(string memory name_, string memory symbol_)
-    ERC721(name_, symbol_)
-    {
-    }
-
-    function mintNft(uint256 _tokenId) public {
-        _mint(msg.sender, _tokenId);
-    }
+    constructor(string memory name_, string memory symbol_) ERC721(name_, symbol_) {}
     
     /// @notice set the user and expires of an NFT
     /// @dev The zero address indicates there is no user
@@ -42,10 +34,9 @@ contract ERC4907 is ERC721, IERC4907 {
     /// @param tokenId The NFT to get the user address for
     /// @return The user address for this NFT
     function userOf(uint256 tokenId) public view override virtual returns(address){
-        if(_users[tokenId].expires >=  block.timestamp){
+        if (uint256(_users[tokenId].expires) >=  block.timestamp) {
             return  _users[tokenId].user;
-        }
-        else{
+        } else {
             return ownerOf(tokenId);
         }
     }
@@ -55,7 +46,7 @@ contract ERC4907 is ERC721, IERC4907 {
     /// @param tokenId The NFT to get the user expires for
     /// @return The user expires for this NFT
     function userExpires(uint256 tokenId) public view override virtual returns(uint256){
-        if(_users[tokenId].expires >=  block.timestamp){
+        if (uint256(_users[tokenId].expires) >=  block.timestamp) {
             return _users[tokenId].expires;
         } else {
             return 0;
@@ -67,7 +58,25 @@ contract ERC4907 is ERC721, IERC4907 {
         return interfaceId == type(IERC4907).interfaceId || super.supportsInterface(interfaceId);
     }
 
-    function getTimeStamp() public view returns (uint256) {
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual {
+        super._beforeTokenTransfer(from, to, tokenId,0);
+
+        if (from != to && _users[tokenId].user != address(0)) {
+            delete _users[tokenId];
+            emit UpdateUser(tokenId, address(0), 0);
+        }
+    }
+
+    function mint(uint256 tokenId) public {
+        // this is the mint function that you need to customize for yourself
+        _mint(msg.sender, tokenId);
+    }
+
+    function time() public view returns (uint256) {
         return block.timestamp;
     }
 } 
